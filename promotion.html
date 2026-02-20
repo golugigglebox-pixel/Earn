@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Promotion | Invest Platform</title>
+    <link rel="stylesheet" href="user-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Promotion & Referrals</h1>
+            <div class="header-right">
+                <i class="fas fa-share-alt" onclick="shareApp()"></i>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Referral Card -->
+            <div class="referral-card">
+                <div class="referral-header">
+                    <i class="fas fa-gift"></i>
+                    <h2>Refer & Earn</h2>
+                </div>
+                <p>Invite your friends and earn up to ₹500 per referral</p>
+                
+                <div class="referral-code-box">
+                    <span id="referralCode">CAD123ABC</span>
+                    <button onclick="copyReferralCode()">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                
+                <div class="referral-stats">
+                    <div class="stat">
+                        <span class="stat-value" id="totalReferrals">12</span>
+                        <span class="stat-label">Total Referrals</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="referralEarnings">₹2,450</span>
+                        <span class="stat-label">Earned</span>
+                    </div>
+                </div>
+                
+                <button class="btn-primary btn-block" onclick="shareReferral()">
+                    <i class="fas fa-share-alt"></i> Share Referral Link
+                </button>
+            </div>
+
+            <!-- Daily Bonus -->
+            <div class="bonus-card">
+                <h3>Daily Check-in Bonus</h3>
+                <div class="bonus-grid" id="bonusGrid">
+                    <!-- Bonus days will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Active Promotions -->
+            <section class="promotions-section">
+                <h3>Active Promotions</h3>
+                <div class="promotions-list" id="promotionsList">
+                    <!-- Promotions will be loaded here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="products.html" class="nav-item">
+                <i class="fas fa-cube"></i>
+                <span>Products</span>
+            </a>
+            <a href="promotion.html" class="nav-item active">
+                <i class="fas fa-gift"></i>
+                <span>Promotion</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="user-script.js"></script>
+</body>
+</html>

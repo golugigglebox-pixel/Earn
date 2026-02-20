@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Products | Invest Platform</title>
+    <link rel="stylesheet" href="user-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Investment Products</h1>
+            <div class="header-right">
+                <i class="fas fa-search" onclick="toggleSearch()"></i>
+            </div>
+        </header>
+
+        <!-- Search Bar (hidden by default) -->
+        <div class="search-bar" id="searchBar" style="display: none;">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search products..." id="productSearch">
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterProducts('all')">All</button>
+            <button class="filter-tab" onclick="filterProducts('investment')">Investment</button>
+            <button class="filter-tab" onclick="filterProducts('savings')">Savings</button>
+            <button class="filter-tab" onclick="filterProducts('stocks')">Stocks</button>
+        </div>
+
+        <!-- Products Grid -->
+        <main class="main-content">
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+                <div class="loading-spinner">Loading products...</div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="products.html" class="nav-item active">
+                <i class="fas fa-cube"></i>
+                <span>Products</span>
+            </a>
+            <a href="promotion.html" class="nav-item">
+                <i class="fas fa-gift"></i>
+                <span>Promotion</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="user-script.js"></script>
+</body>
+</html>

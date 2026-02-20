@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>My Investments | Invest Platform</title>
+    <link rel="stylesheet" href="user-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>My Investments</h1>
+            <div class="header-right">
+                <i class="fas fa-chart-pie" onclick="showInvestmentStats()"></i>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Summary Cards -->
+            <div class="investment-summary">
+                <div class="summary-card">
+                    <span class="label">Total Invested</span>
+                    <span class="value" id="totalInvested">₹0</span>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Current Value</span>
+                    <span class="value" id="currentValue">₹0</span>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Total Profit</span>
+                    <span class="value profit" id="totalProfit">+₹0</span>
+                </div>
+            </div>
+
+            <!-- Investment Tabs -->
+            <div class="investment-tabs">
+                <button class="tab-btn active" onclick="switchInvestmentTab('active')">Active</button>
+                <button class="tab-btn" onclick="switchInvestmentTab('completed')">Completed</button>
+                <button class="tab-btn" onclick="switchInvestmentTab('pending')">Pending</button>
+            </div>
+
+            <!-- Investments List -->
+            <div class="investments-list" id="investmentsList">
+                <!-- Investments will be loaded here -->
+                <div class="loading-spinner">Loading investments...</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="user-script.js"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Profile | Invest Platform</title>
+    <link rel="stylesheet" href="user-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>My Profile</h1>
+            <div class="header-right">
+                <i class="fas fa-edit" onclick="editProfile()"></i>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">
+                    <img src="https://ui-avatars.com/api/?name=User&background=4361ee&color=fff" alt="Profile">
+                    <button class="change-photo" onclick="changePhoto()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <h2 id="profileName">John Doe</h2>
+                <p id="profileEmail">john@example.com</p>
+                <p id="profilePhone">+91 9876543210</p>
+            </div>
+
+            <!-- Account Stats -->
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalInvested">₹45,000</span>
+                    <span class="stat-label">Total Invested</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="activeInvestments">3</span>
+                    <span class="stat-label">Active</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalEarnings">₹8,250</span>
+                    <span class="stat-label">Earnings</span>
+                </div>
+            </div>
+
+            <!-- Menu Options -->
+            <div class="profile-menu">
+                <a href="investments.html" class="menu-option">
+                    <i class="fas fa-chart-line"></i>
+                    <span>My Investments</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="transactions.html" class="menu-option">
+                    <i class="fas fa-history"></i>
+                    <span>Transaction History</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="bank-details.html" class="menu-option">
+                    <i class="fas fa-university"></i>
+                    <span>Bank Details</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="change-password.html" class="menu-option">
+                    <i class="fas fa-lock"></i>
+                    <span>Change Password</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="support.html" class="menu-option">
+                    <i class="fas fa-headset"></i>
+                    <span>Support</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="faq.html" class="menu-option">
+                    <i class="fas fa-question-circle"></i>
+                    <span>FAQ</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="terms.html" class="menu-option">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Terms & Conditions</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="privacy.html" class="menu-option">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Privacy Policy</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <div class="menu-option logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="products.html" class="nav-item">
+                <i class="fas fa-cube"></i>
+                <span>Products</span>
+            </a>
+            <a href="promotion.html" class="nav-item">
+                <i class="fas fa-gift"></i>
+                <span>Promotion</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="user-script.js"></script>
+</body>
+</html>

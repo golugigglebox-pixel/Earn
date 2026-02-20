@@ -14,157 +14,551 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Mock user data (replace with actual auth)
+// Current user (mock for demo - in production, use Firebase Auth)
 const currentUser = {
     id: 'user123',
     name: 'John Doe',
-    displayId: '5541',
+    email: 'john@example.com',
+    phone: '+91 9876543210',
+    referralCode: 'CAD123ABC',
+    balance: 25000,
+    totalInvested: 45000,
+    totalEarnings: 8250,
     dailyProfit: 3250,
-    totalIncome: 6500,
-    investmentDays: 2,
-    quickInvest: 800
+    investmentDays: 2
 };
 
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    initializeDashboard();
+    initializeApp();
+    loadDashboardData();
     loadProducts();
-    setupEventListeners();
+    loadActivities();
+    loadPaymentSettings();
+    setupListeners();
 });
 
-function initializeDashboard() {
-    // Update stats
-    document.getElementById('dailyProfit').textContent = `₹ ${currentUser.dailyProfit.toLocaleString()}`;
-    document.getElementById('totalIncome').textContent = `₹ ${currentUser.totalIncome.toLocaleString()}`;
-    document.getElementById('investmentDays').textContent = currentUser.investmentDays;
-    document.getElementById('quickInvestAmount').textContent = `₹${currentUser.quickInvest}`;
+// Initialize App
+function initializeApp() {
+    // Set current date
+    const dateElement = document.getElementById('currentDate');
+    if (dateElement) {
+        const now = new Date();
+        dateElement.textContent = formatDate(now) + ' ' + formatTime(now);
+    }
     
     // Set user display
-    document.getElementById('userDisplay').textContent = `User ${currentUser.displayId} ******`;
+    const userDisplay = document.getElementById('userDisplay');
+    if (userDisplay) {
+        userDisplay.textContent = `User ${currentUser.id.slice(0, 4)} ******`;
+    }
     
-    // Set current date
-    const now = new Date();
-    const formattedDate = now.toISOString().split('T')[0];
-    const formattedTime = now.toTimeString().split(' ')[0].substring(0,5);
-    document.getElementById('currentDate').textContent = `${formattedDate} ${formattedTime}`;
+    // Update user stats
+    updateUserStats();
 }
 
-function loadProducts() {
-    const slider = document.getElementById('newProductsSlider');
+// Update User Stats
+function updateUserStats() {
+    document.getElementById('dailyProfit') && (document.getElementById('dailyProfit').textContent = `₹ ${currentUser.dailyProfit.toLocaleString()}`);
+    document.getElementById('totalIncome') && (document.getElementById('totalIncome').textContent = `₹ ${currentUser.totalEarnings.toLocaleString()}`);
+    document.getElementById('investmentDays') && (document.getElementById('investmentDays').textContent = currentUser.investmentDays);
+    document.getElementById('quickInvestAmount') && (document.getElementById('quickInvestAmount').textContent = `₹800`);
     
-    // Sample products (replace with Firebase data)
-    const products = [
-        { name: 'Dairymilk 1', price: 1000, roi: 12 },
-        { name: 'Dairymilk 2', price: 2000, roi: 15 },
-        { name: 'Dairymilk 3', price: 5000, roi: 18 },
-        { name: 'Dairymilk 4', price: 10000, roi: 20 }
-    ];
+    // Profile page stats
+    document.getElementById('totalInvested') && (document.getElementById('totalInvested').textContent = `₹${currentUser.totalInvested.toLocaleString()}`);
+    document.getElementById('totalEarnings') && (document.getElementById('totalEarnings').textContent = `₹${currentUser.totalEarnings.toLocaleString()}`);
+    document.getElementById('availableBalance') && (document.getElementById('availableBalance').textContent = `₹${currentUser.balance.toLocaleString()}`);
+}
+
+// Load Dashboard Data
+function loadDashboardData() {
+    // Load products for slider
+    loadProductsForSlider();
+    
+    // Load user investments
+    loadUserInvestments();
+}
+
+// Load Products
+function loadProducts() {
+    database.ref('products').once('value', (snapshot) => {
+        const products = snapshot.val() || {};
+        displayProducts(products);
+    });
+}
+
+// Load Products for Slider
+function loadProductsForSlider() {
+    database.ref('products').limitToFirst(5).once('value', (snapshot) => {
+        const products = snapshot.val() || {};
+        displayProductsSlider(products);
+    });
+}
+
+// Display Products Slider
+function displayProductsSlider(products) {
+    const slider = document.getElementById('newProductsSlider');
+    if (!slider) return;
     
     slider.innerHTML = '';
     
-    products.forEach(product => {
+    Object.values(products).forEach(product => {
+        if (product.status !== 'active') return;
+        
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
             <h3>${product.name}</h3>
-            <div class="product-price">₹${product.price}</div>
+            <div class="product-price">₹${product.price.toLocaleString()}</div>
             <div class="product-roi">${product.roi}% ROI</div>
-            <button class="product-btn" onclick="investInProduct('${product.name}', ${product.price})">
-                Invest Now
-            </button>
+            <button class="product-btn" onclick="quickInvest('${product.id}')">Invest</button>
         `;
         slider.appendChild(card);
     });
 }
 
-// Check-in functionality
-document.getElementById('checkinBtn')?.addEventListener('click', function() {
-    const today = new Date().toDateString();
-    const lastCheckin = localStorage.getItem('lastCheckin');
+// Display Products Grid
+function displayProducts(products) {
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
     
-    if (lastCheckin === today) {
-        showToast('Already checked in today!');
+    grid.innerHTML = '';
+    
+    Object.entries(products).forEach(([id, product]) => {
+        if (product.status !== 'active') return;
+        
+        const riskClass = `risk-${product.risk || 'medium'}`;
+        const card = document.createElement('div');
+        card.className = 'product-card-large';
+        card.innerHTML = `
+            <span class="product-badge">${product.category || 'Investment'}</span>
+            <h3>${product.name}</h3>
+            <div class="product-category">Min: ₹${product.price.toLocaleString()}</div>
+            <div class="product-price-large">₹${product.price.toLocaleString()}</div>
+            <div class="product-meta">
+                <span class="product-roi-large">${product.roi}% ROI</span>
+                <span class="product-risk ${riskClass}">${(product.risk || 'Medium').toUpperCase()}</span>
+            </div>
+            <div class="product-meta">
+                <span>${product.duration || 365} days</span>
+            </div>
+            <button class="product-btn" onclick="investNow('${id}')">Invest Now</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Load Activities
+function loadActivities() {
+    database.ref('activity').orderByChild('timestamp').limitToLast(5).once('value', (snapshot) => {
+        const activities = snapshot.val() || {};
+        displayActivities(activities);
+    });
+}
+
+// Display Activities
+function displayActivities(activities) {
+    const list = document.getElementById('recentActivities');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    if (Object.keys(activities).length === 0) {
+        // Mock activities
+        const mockActivities = [
+            { title: 'Investment credited', time: '2 min ago', amount: '+₹500', type: 'profit' },
+            { title: 'Withdrawal processed', time: '1 hour ago', amount: '-₹2,000', type: 'withdrawal' },
+            { title: 'Daily profit credited', time: '5 hours ago', amount: '+₹325', type: 'profit' },
+            { title: 'Investment made', time: '1 day ago', amount: '-₹10,000', type: 'investment' }
+        ];
+        
+        mockActivities.forEach(activity => {
+            const item = createActivityItem(activity);
+            list.appendChild(item);
+        });
+    } else {
+        Object.values(activities).reverse().forEach(activity => {
+            const item = createActivityItem({
+                title: activity.action,
+                time: activity.time,
+                amount: activity.amount,
+                type: activity.type || 'profit'
+            });
+            list.appendChild(item);
+        });
+    }
+}
+
+function createActivityItem(activity) {
+    const div = document.createElement('div');
+    div.className = 'activity-item';
+    
+    let iconClass = 'fa-chart-line';
+    let iconBg = 'profit';
+    
+    if (activity.type === 'withdrawal') {
+        iconClass = 'fa-money-bill-wave';
+        iconBg = 'withdrawal';
+    } else if (activity.type === 'investment') {
+        iconClass = 'fa-coins';
+        iconBg = 'investment';
+    }
+    
+    div.innerHTML = `
+        <div class="activity-icon ${iconBg}">
+            <i class="fas ${iconClass}"></i>
+        </div>
+        <div class="activity-details">
+            <div class="activity-title">${activity.title}</div>
+            <div class="activity-time">${activity.time}</div>
+        </div>
+        <div class="activity-amount ${activity.amount.startsWith('+') ? 'positive' : 'negative'}">${activity.amount}</div>
+    `;
+    
+    return div;
+}
+
+// Load Payment Settings
+function loadPaymentSettings() {
+    database.ref('settings/payment').once('value', (snapshot) => {
+        const settings = snapshot.val() || {};
+        
+        // Update UPI details
+        const upiIdElement = document.getElementById('upiId');
+        if (upiIdElement) {
+            upiIdElement.textContent = settings.upiId || 'admin@okhdfcbank';
+        }
+        
+        const qrElement = document.getElementById('upiQR');
+        if (qrElement) {
+            qrElement.src = settings.qrCode || 'https://via.placeholder.com/200';
+        }
+    });
+}
+
+// Load User Investments
+function loadUserInvestments() {
+    // This would filter by current user ID in production
+    database.ref('investments').orderByChild('userId').equalTo(currentUser.id).once('value', (snapshot) => {
+        const investments = snapshot.val() || {};
+        displayUserInvestments(investments);
+    });
+}
+
+// Display User Investments
+function displayUserInvestments(investments) {
+    const list = document.getElementById('investmentsList');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    if (Object.keys(investments).length === 0) {
+        list.innerHTML = '<div class="text-center" style="padding: 2rem;">No investments found</div>';
         return;
     }
     
-    localStorage.setItem('lastCheckin', today);
-    
-    // Update streak
-    let streak = parseInt(localStorage.getItem('checkinStreak') || '0');
-    streak++;
-    localStorage.setItem('checkinStreak', streak);
-    
-    // Update badge
-    document.querySelector('.badge').textContent = streak;
-    
-    showToast(`Check-in successful! Day ${streak} streak!`);
-});
+    Object.entries(investments).forEach(([id, investment]) => {
+        const progress = (investment.daysCompleted / investment.duration) * 100;
+        const card = document.createElement('div');
+        card.className = 'investment-card';
+        card.innerHTML = `
+            <div class="investment-header">
+                <div>
+                    <div class="investment-product">${investment.productName}</div>
+                    <div class="investment-date">Started: ${formatDate(new Date(investment.startDate))}</div>
+                </div>
+                <div class="investment-amount">₹${investment.amount.toLocaleString()}</div>
+            </div>
+            <div class="investment-details">
+                <div class="investment-detail">
+                    <span class="label">Current Value</span>
+                    <span class="value">₹${(investment.currentValue || investment.amount).toLocaleString()}</span>
+                </div>
+                <div class="investment-detail">
+                    <span class="label">Profit</span>
+                    <span class="value ${(investment.profitLoss || 0) >= 0 ? 'profit-positive' : 'profit-negative'}">
+                        ${(investment.profitLoss || 0) >= 0 ? '+' : '-'}₹${Math.abs(investment.profitLoss || 0).toLocaleString()}
+                    </span>
+                </div>
+                <div class="investment-detail">
+                    <span class="label">Returns</span>
+                    <span class="value">${investment.profitLossPercent || 0}%</span>
+                </div>
+            </div>
+            <div class="investment-progress">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <div class="investment-footer">
+                <span class="investment-status status-${investment.status}">${investment.status}</span>
+                <span>${investment.daysCompleted || 0}/${investment.duration} days</span>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
 
-// Show modals
+// Load Transactions
+function loadTransactions() {
+    database.ref('transactions').orderByChild('userId').equalTo(currentUser.id).limitToLast(20).once('value', (snapshot) => {
+        const transactions = snapshot.val() || {};
+        displayTransactions(transactions);
+    });
+}
+
+// Display Transactions
+function displayTransactions(transactions) {
+    const list = document.getElementById('transactionsList');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    if (Object.keys(transactions).length === 0) {
+        list.innerHTML = '<div class="text-center" style="padding: 2rem;">No transactions found</div>';
+        return;
+    }
+    
+    Object.values(transactions).reverse().forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'transaction-item';
+        
+        let icon = 'fa-arrow-down';
+        let iconClass = 'deposit';
+        let amountClass = 'positive';
+        let amountPrefix = '+';
+        
+        if (t.type === 'withdrawal') {
+            icon = 'fa-arrow-up';
+            iconClass = 'withdrawal';
+            amountClass = 'negative';
+            amountPrefix = '-';
+        } else if (t.type === 'profit') {
+            icon = 'fa-chart-line';
+            iconClass = 'profit';
+        } else if (t.type === 'investment') {
+            icon = 'fa-coins';
+            iconClass = 'investment';
+            amountClass = 'negative';
+            amountPrefix = '-';
+        }
+        
+        item.innerHTML = `
+            <div class="transaction-icon ${iconClass}">
+                <i class="fas ${icon}"></i>
+            </div>
+            <div class="transaction-details">
+                <div class="transaction-title">${t.description || t.type}</div>
+                <div class="transaction-meta">${formatDate(new Date(t.date))}</div>
+            </div>
+            <div class="transaction-amount ${amountClass}">${amountPrefix}₹${t.amount.toLocaleString()}</div>
+        `;
+        
+        list.appendChild(item);
+    });
+}
+
+// Menu Toggle
+document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
+
+function toggleMenu() {
+    document.getElementById('sideMenu').classList.toggle('active');
+    document.getElementById('overlay').classList.toggle('active');
+}
+
+function closeAllModals() {
+    document.getElementById('sideMenu')?.classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.classList.remove('active');
+    });
+}
+
+// Modal Functions
+function showInvestModal() {
+    // Load products for select
+    database.ref('products').once('value', (snapshot) => {
+        const products = snapshot.val() || {};
+        const select = document.getElementById('investProduct');
+        select.innerHTML = '<option value="">Choose product...</option>';
+        
+        Object.entries(products).forEach(([id, product]) => {
+            if (product.status === 'active') {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${product.name} - ₹${product.price} (${product.roi}% ROI)`;
+                select.appendChild(option);
+            }
+        });
+    });
+    
+    openModal('investModal');
+}
+
 function showRecharge() {
-    showToast('Recharge feature coming soon!');
+    openModal('rechargeModal');
 }
 
 function showWithdraw() {
-    showToast('Withdraw feature coming soon!');
+    document.getElementById('availableBalance').textContent = `₹${currentUser.balance.toLocaleString()}`;
+    openModal('withdrawModal');
 }
 
-function showInvestModal() {
-    showToast('Investment feature coming soon!');
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+    document.getElementById('overlay').classList.add('active');
 }
 
-function investInProduct(name, price) {
-    showToast(`Investing ₹${price} in ${name}`);
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
 }
 
-// Toast notification
-function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    document.body.appendChild(toast);
+// Investment Form
+document.getElementById('investForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
     
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
-// Add toast styles
-const style = document.createElement('style');
-style.textContent = `
-    .toast {
-        position: fixed;
-        bottom: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--card-bg);
-        color: white;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        z-index: 2000;
-        animation: slideUp 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        border: 1px solid rgba(255,255,255,0.1);
+    const productId = document.getElementById('investProduct').value;
+    const amount = parseFloat(document.getElementById('investAmount').value);
+    const method = document.getElementById('paymentMethod').value;
+    
+    if (!productId) {
+        showToast('Please select a product');
+        return;
     }
     
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translate(-50%, 100%);
+    // Get product details
+    database.ref(`products/${productId}`).once('value', (snapshot) => {
+        const product = snapshot.val();
+        
+        if (amount < product.price) {
+            showToast(`Minimum investment is ₹${product.price}`);
+            return;
         }
-        to {
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
-    }
-`;
-document.head.appendChild(style);
+        
+        // Create investment
+        const investment = {
+            userId: currentUser.id,
+            userName: currentUser.name,
+            productId: productId,
+            productName: product.name,
+            amount: amount,
+            currentValue: amount,
+            profitLoss: 0,
+            profitLossPercent: 0,
+            startDate: new Date().toISOString(),
+            endDate: new Date(Date.now() + (product.duration * 24 * 60 * 60 * 1000)).toISOString(),
+            duration: product.duration,
+            daysCompleted: 0,
+            status: 'pending',
+            roi: product.roi
+        };
+        
+        database.ref('investments').push(investment)
+            .then(() => {
+                // Create transaction
+                const transaction = {
+                    userId: currentUser.id,
+                    type: 'investment',
+                    amount: amount,
+                    description: `Invested in ${product.name}`,
+                    status: 'pending',
+                    date: new Date().toISOString()
+                };
+                
+                database.ref('transactions').push(transaction);
+                
+                showToast('Investment successful!');
+                closeModal('investModal');
+                
+                // Add to activity
+                database.ref('activity').push({
+                    user: currentUser.name,
+                    action: `Invested ₹${amount} in ${product.name}`,
+                    time: 'Just now',
+                    timestamp: Date.now()
+                });
+            })
+            .catch(error => {
+                console.error('Error making investment:', error);
+                showToast('Error making investment');
+            });
+    });
+});
 
-function setupEventListeners() {
-    // Close modals when clicking outside
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.classList.remove('active');
-        }
+// Recharge Form
+document.getElementById('rechargeForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('rechargeAmount').value);
+    const method = document.getElementById('rechargeMethod').value;
+    
+    if (amount < 100) {
+        showToast('Minimum recharge amount is ₹100');
+        return;
+    }
+    
+    // Create transaction
+    const transaction = {
+        userId: currentUser.id,
+        type: 'deposit',
+        amount: amount,
+        method: method,
+        description: `Added money via ${method.toUpperCase()}`,
+        status: 'pending',
+        date: new Date().toISOString()
     };
-}
+    
+    database.ref('transactions').push(transaction)
+        .then(() => {
+            showToast('Recharge request submitted! Please complete payment.');
+            closeModal('rechargeModal');
+            
+            // Add to activity
+            database.ref('activity').push({
+                user: currentUser.name,
+                action: `Recharged ₹${amount} via ${method}`,
+                time: 'Just now',
+                timestamp: Date.now()
+            });
+        })
+        .catch(error => {
+            console.error('Error creating recharge:', error);
+            showToast('Error creating recharge');
+        });
+});
+
+// Withdraw Form
+document.getElementById('withdrawForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
+    const method = document.getElementById('withdrawMethod').value;
+    
+    if (amount < 100) {
+        showToast('Minimum withdrawal amount is ₹100');
+        return;
+    }
+    
+    if (amount > currentUser.balance) {
+        showToast('Insufficient balance');
+        return;
+    }
+    
+    // Validate details based on method
+    if (method === 'bank') {
+        const accountName = document.getElementById('accountName').value;
+        const accountNumber = document.getElementById('accountNumber').value;
+        const ifscCode = document.getElementById('ifscCode').value;
+        
+        if (!accountName || !accountNumber || !ifscCode) {
+            showToast('Please fill all bank details');
+            return;
+        }
+    } else if (method === 'upi') {
+        const upiId = document.getElementById('upiIdWithdraw').value;
+        if (!upiId) {
+            showToast('Please enter UPI ID');
+            return;
+        }
+    }
+    
+    // Create withdrawal re

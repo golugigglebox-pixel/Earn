@@ -6,101 +6,84 @@
     <title>Cadbury | Dashboard</title>
     <link rel="stylesheet" href="user-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
+        <!-- Header with Logo -->
         <header class="main-header">
-            <h1 class="logo">Cadbury</h1>
-            <div class="header-actions">
-                <button class="checkin-btn" id="checkinBtn">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Check-In</span>
-                </button>
-                <div class="notification-icon">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge">3</span>
-                </div>
+            <div class="logo-container">
+                <h1 class="logo">Cadbury</h1>
+            </div>
+            <div class="header-right">
+                <div class="dairy-milk">Dairy Milk</div>
+                <div class="daily-milk">Daily Milk</div>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Action Buttons Grid -->
-            <div class="actions-grid">
-                <button class="action-btn" onclick="window.location.href='referral.html'">
-                    <div class="action-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <span>Referral</span>
-                </button>
-                <button class="action-btn" onclick="showRecharge()">
-                    <div class="action-icon">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <span>Recharge</span>
-                </button>
-                <button class="action-btn" onclick="showWithdraw()">
-                    <div class="action-icon">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <span>Withdraw</span>
-                </button>
-            </div>
+        <!-- ARNKARO Text -->
+        <div class="brand-text">ARNKARO</div>
 
-            <!-- Stats Cards -->
-            <div class="stats-container">
-                <!-- Daily Profit Card -->
-                <div class="stat-card profit-card">
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-number" id="dailyProfit">7</div>
+                <div class="stat-label">CheckIn</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="referral">0</div>
+                <div class="stat-label">Refferal</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="recharge">0</div>
+                <div class="stat-label">Recharge</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="withdraw">0</div>
+                <div class="stat-label">withdraw</div>
+            </div>
+        </div>
+
+        <!-- New Product Section -->
+        <div class="section-title">☆ New Product</div>
+
+        <!-- Product Card -->
+        <div class="product-card">
+            <div class="product-header">
+                <h2 class="product-name">Dairymilk 1</h2>
+                <div class="product-amount">₹ 3250</div>
+            </div>
+            
+            <div class="product-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="dailyProfitAmount">₹ 3250</div>
                     <div class="stat-label">Daily Profit</div>
-                    <div class="stat-value" id="dailyProfit">₹ 3,250</div>
-                    <div class="stat-subtext">Today's earnings</div>
                 </div>
-
-                <!-- Total Income Card -->
-                <div class="stat-card income-card">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalIncome">₹ 6500</div>
                     <div class="stat-label">Total Income</div>
-                    <div class="stat-value" id="totalIncome">₹ 6,500</div>
-                    <div class="stat-subtext">Lifetime</div>
                 </div>
             </div>
 
-            <!-- Days Counter and Quick Invest -->
-            <div class="invest-section">
-                <div class="days-counter">
+            <div class="product-footer">
+                <div class="days-info">
                     <span class="days-label">Days:</span>
                     <span class="days-value" id="investmentDays">2</span>
                 </div>
-                
-                <div class="quick-invest">
-                    <span class="invest-amount" id="quickInvestAmount">₹800</span>
-                    <button class="invest-btn" onclick="showInvestModal()">Invest</button>
+                <div class="price-info">
+                    <span class="price-label">Price:</span>
+                    <span class="price-value" id="productPrice">₹800</span>
                 </div>
+                <button class="invest-btn" onclick="showInvestModal()">Invest</button>
             </div>
+        </div>
 
-            <div class="invest-note">Minimum investment</div>
-
-            <!-- User Info Banner -->
-            <div class="user-banner">
-                <i class="fas fa-user-circle"></i>
-                <span class="user-id" id="userDisplay">User 5541 ******</span>
-                <span class="banner-date" id="currentDate">2026-02-01 11:57</span>
-            </div>
-
-            <!-- New Product Section -->
-            <section class="products-section">
-                <div class="section-header">
-                    <h2>New Product</h2>
-                    <a href="products.html" class="view-all">View All</a>
-                </div>
-                
-                <div class="products-slider" id="newProductsSlider">
-                    <!-- Products will be loaded here -->
-                    <div class="loading-spinner">Loading...</div>
-                </div>
-            </section>
-        </main>
+        <!-- User Info Banner -->
+        <div class="user-banner">
+            <i class="fas fa-user-circle"></i>
+            <span class="user-id" id="userDisplay">User 5541 ******</span>
+            <span class="banner-date" id="currentDate">2026-02-01 11:57</span>
+        </div>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
@@ -121,19 +104,30 @@
                 <span>Profile</span>
             </a>
         </nav>
+    </div>
 
-        <!-- Modals (same as before) -->
-        <!-- Invest Modal -->
-        <div class="modal" id="investModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Make Investment</h3>
-                    <button class="close-modal" onclick="closeModal('investModal')">&times;</button>
-                </div>
-                <form id="investForm">
-                    <!-- Form content same as previous -->
-                </form>
+    <!-- Invest Modal -->
+    <div class="modal" id="investModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Make Investment</h3>
+                <button class="close-modal" onclick="closeModal('investModal')">&times;</button>
             </div>
+            <form id="investForm">
+                <div class="form-group">
+                    <label>Select Product</label>
+                    <select id="investProduct" required>
+                        <option value="Dairymilk 1">Dairymilk 1 - ₹800 (12% ROI)</option>
+                        <option value="Dairymilk 2">Dairymilk 2 - ₹2000 (15% ROI)</option>
+                        <option value="Dairymilk 3">Dairymilk 3 - ₹5000 (18% ROI)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="investAmount" min="800" value="800" required>
+                </div>
+                <button type="submit" class="invest-btn" style="width: 100%;">Confirm Investment</button>
+            </form>
         </div>
     </div>
 
@@ -142,4 +136,5 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="user-script.js"></script>
 </body>
+                        </html></body>
 </html>

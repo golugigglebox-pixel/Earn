@@ -7,133 +7,110 @@
     <link rel="stylesheet" href="user-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .promotion-page {
-            padding-bottom: 80px;
-        }
-        
         .promo-card {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #2a2a4a, #1a1a3a);
+            padding: 20px;
+            margin-bottom: 16px;
         }
         
         .promo-title {
-            font-size: 1.2rem;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 12px;
         }
         
-        .promo-code {
-            background: rgba(255,255,255,0.1);
-            padding: 1rem;
+        .referral-code {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 12px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 1rem 0;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
+            margin: 12px 0;
+            font-size: 18px;
+            letter-spacing: 1px;
         }
         
         .copy-btn {
-            background: #8e2de2;
+            background: var(--accent-purple);
             border: none;
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
             cursor: pointer;
-        }
-        
-        .bonus-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        
-        .bonus-day {
-            text-align: center;
-            padding: 0.5rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-        
-        .bonus-day.active {
-            background: #8e2de2;
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="promotion-page">
-            <div class="products-header">
-                <button class="back-btn" onclick="window.location.href='dashboard.html'">
-                    <i class="fas fa-arrow-left"></i>
+        <div class="back-header">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Promotions</h2>
+        </div>
+        
+        <div class="promo-card">
+            <div class="promo-title">Referral Program</div>
+            <p>Invite friends and earn rewards</p>
+            <div class="referral-code" id="referralCode">
+                <span>CAD123ABC</span>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="fas fa-copy"></i>
                 </button>
-                <h2>Promotions</h2>
-                <div></div>
             </div>
-            
-            <div class="promo-card">
-                <div class="promo-title">Refer & Earn</div>
-                <p>Invite friends and earn up to ₹500 per referral</p>
-                <div class="promo-code">
-                    <span>CAD123ABC</span>
-                    <button class="copy-btn" onclick="copyCode()">
-                        <i class="fas fa-copy"></i>
-                    </button>
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 20px; font-weight: 700;">12</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Referrals</div>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
-                    <div>
-                        <div style="font-size: 1.5rem; font-weight: 700;">12</div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Referrals</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.5rem; font-weight: 700;">₹2,450</div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Earned</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="promo-card">
-                <div class="promo-title">Daily Check-in Bonus</div>
-                <div class="bonus-grid">
-                    <div class="bonus-day active">D1<br>₹10</div>
-                    <div class="bonus-day active">D2<br>₹20</div>
-                    <div class="bonus-day active">D3<br>₹30</div>
-                    <div class="bonus-day">D4<br>₹40</div>
-                    <div class="bonus-day">D5<br>₹50</div>
-                    <div class="bonus-day">D6<br>₹60</div>
-                    <div class="bonus-day">D7<br>₹100</div>
+                <div>
+                    <div style="font-size: 20px; font-weight: 700;">₹2,450</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Earned</div>
                 </div>
             </div>
         </div>
         
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="products.html" class="nav-item">
-                <i class="fas fa-cube"></i>
-                <span>Products</span>
-            </a>
-            <a href="promotion.html" class="nav-item active">
-                <i class="fas fa-gift"></i>
-                <span>Promotion</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
+        <div class="promo-card">
+            <div class="promo-title">Daily Check-in Bonus</div>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                <div class="stat-box" style="background: var(--accent-purple);">
+                    <div class="stat-number">₹10</div>
+                    <div class="stat-label">Day 1</div>
+                </div>
+                <div class="stat-box" style="background: var(--accent-purple);">
+                    <div class="stat-number">₹20</div>
+                    <div class="stat-label">Day 2</div>
+                </div>
+                <div class="stat-box" style="background: var(--accent-purple);">
+                    <div class="stat-number">₹30</div>
+                    <div class="stat-label">Day 3</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">₹40</div>
+                    <div class="stat-label">Day 4</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">₹50</div>
+                    <div class="stat-label">Day 5</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">₹60</div>
+                    <div class="stat-label">Day 6</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">₹100</div>
+                    <div class="stat-label">Day 7</div>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
     <script>
         function copyCode() {
-            navigator.clipboard.writeText('CAD123ABC');
+            const code = document.querySelector('#referralCode span').textContent;
+            navigator.clipboard.writeText(code);
             alert('Referral code copied!');
         }
     </script>

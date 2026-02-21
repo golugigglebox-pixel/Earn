@@ -2,128 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Profile | Invest Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Cadbury</title>
     <link rel="stylesheet" href="user-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-header {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 40px;
+            color: white;
+        }
+        
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .profile-email {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .menu-item {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .menu-item i {
+            color: var(--accent-purple);
+            width: 24px;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="main-header">
-            <button class="back-btn" onclick="goBack()">
+        <div class="back-header">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <h1>My Profile</h1>
-            <div class="header-right">
-                <i class="fas fa-edit" onclick="editProfile()"></i>
-            </div>
-        </header>
-
-        <main class="main-content">
-            <!-- Profile Header -->
-            <div class="profile-header">
-                <div class="profile-avatar" id="profileAvatar">
-                    <img src="https://ui-avatars.com/api/?name=User&background=4361ee&color=fff" alt="Profile">
-                    <button class="change-photo" onclick="changePhoto()">
-                        <i class="fas fa-camera"></i>
-                    </button>
-                </div>
-                <h2 id="profileName">John Doe</h2>
-                <p id="profileEmail">john@example.com</p>
-                <p id="profilePhone">+91 9876543210</p>
-            </div>
-
-            <!-- Account Stats -->
-            <div class="profile-stats">
-                <div class="stat-item">
-                    <span class="stat-value" id="totalInvested">₹45,000</span>
-                    <span class="stat-label">Total Invested</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="activeInvestments">3</span>
-                    <span class="stat-label">Active</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="totalEarnings">₹8,250</span>
-                    <span class="stat-label">Earnings</span>
-                </div>
-            </div>
-
-            <!-- Menu Options -->
-            <div class="profile-menu">
-                <a href="investments.html" class="menu-option">
-                    <i class="fas fa-chart-line"></i>
-                    <span>My Investments</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="transactions.html" class="menu-option">
-                    <i class="fas fa-history"></i>
-                    <span>Transaction History</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="bank-details.html" class="menu-option">
-                    <i class="fas fa-university"></i>
-                    <span>Bank Details</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="change-password.html" class="menu-option">
-                    <i class="fas fa-lock"></i>
-                    <span>Change Password</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="support.html" class="menu-option">
-                    <i class="fas fa-headset"></i>
-                    <span>Support</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="faq.html" class="menu-option">
-                    <i class="fas fa-question-circle"></i>
-                    <span>FAQ</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="terms.html" class="menu-option">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Terms & Conditions</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="privacy.html" class="menu-option">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Privacy Policy</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <div class="menu-option logout" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="products.html" class="nav-item">
-                <i class="fas fa-cube"></i>
-                <span>Products</span>
-            </a>
-            <a href="promotion.html" class="nav-item">
-                <i class="fas fa-gift"></i>
-                <span>Promotion</span>
-            </a>
-            <a href="profile.html" class="nav-item active">
+            <h2>My Profile</h2>
+        </div>
+        
+        <div class="profile-header">
+            <div class="avatar">
                 <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
+            </div>
+            <div class="profile-name" id="profileName">John Doe</div>
+            <div class="profile-email" id="profileEmail">john@example.com</div>
+            <div class="profile-phone" id="profilePhone">+91 98765 43210</div>
+        </div>
+        
+        <div class="menu-item">
+            <i class="fas fa-history"></i>
+            <span>Transaction History</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-university"></i>
+            <span>Bank Details</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-lock"></i>
+            <span>Change Password</span>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-headset"></i>
+            <span>Support</span>
+        </div>
+        <div class="menu-item" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="user-script.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('profileName').textContent = user.displayName || 'User';
+                document.getElementById('profileEmail').textContent = user.email || '';
+                document.getElementById('profilePhone').textContent = user.phoneNumber || 'Not provided';
+            }
+        });
+        
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+    </script>
 </body>
 </html>

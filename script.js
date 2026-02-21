@@ -13,552 +13,216 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+const auth = firebase.auth();
 
-// Current user (mock for demo - in production, use Firebase Auth)
-const currentUser = {
-    id: 'user123',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+91 9876543210',
-    referralCode: 'CAD123ABC',
-    balance: 25000,
-    totalInvested: 45000,
-    totalEarnings: 8250,
-    dailyProfit: 3250,
-    investmentDays: 2
-};
+let currentUser = null;
+let userId = null;
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-    loadDashboardData();
-    loadProducts();
-    loadActivities();
-    loadPaymentSettings();
-    setupListeners();
+// Auth State Observer
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        userId = user.uid;
+        await loadUserData();
+        await loadDashboardData();
+    } else {
+        window.location.href = 'login.html';
+    }
 });
 
-// Initialize App
-function initializeApp() {
-    // Set current date
-    const dateElement = document.getElementById('currentDate');
-    if (dateElement) {
-        const now = new Date();
-        dateElement.textContent = formatDate(now) + ' ' + formatTime(now);
+// Load User Data
+async function loadUserData() {
+    try {
+        const snapshot = await database.ref(`users/${userId}`).once('value');
+        currentUser = snapshot.val() || {
+            name: 'User',
+            email: '',
+            dailyProfit: 3250,
+            totalIncome: 6500,
+            investmentDays: 2,
+            checkIn: 7,
+            referral: 0,
+            recharge: 0,
+            withdraw: 0
+        };
+        
+        updateUI();
+    } catch (error) {
+        console.error('Error loading user data:', error);
     }
-    
-    // Set user display
-    const userDisplay = document.getElementById('userDisplay');
-    if (userDisplay) {
-        userDisplay.textContent = `User ${currentUser.id.slice(0, 4)} ******`;
+}
+
+// Load Dashboard Data from Firebase
+async function loadDashboardData() {
+    try {
+        // Load user stats from Firebase
+        const statsSnapshot = await database.ref(`users/${userId}/stats`).once('value');
+        const stats = statsSnapshot.val() || {};
+        
+        // Load products from admin
+        const productsSnapshot = await database.ref('products').limitToFirst(1).once('value');
+        const products = productsSnapshot.val() || {};
+        
+        if (Object.keys(products).length > 0) {
+            const firstProduct = Object.values(products)[0];
+            document.querySelector('.product-name').textContent = firstProduct.name || 'Dairymilk 1';
+            document.querySelector('.product-amount').textContent = `₹ ${firstProduct.amount || 3250}`;
+            document.querySelector('.price-value').textContent = `₹${firstProduct.price || 800}`;
+        }
+        
+        // Update UI with Firebase data
+        document.getElementById('dailyProfitAmount').textContent = `₹ ${stats.dailyProfit || 3250}`;
+        document.getElementById('totalIncome').textContent = `₹ ${stats.totalIncome || 6500}`;
+        document.getElementById('investmentDays').textContent = stats.investmentDays || 2;
+        document.getElementById('dailyProfit').textContent = stats.checkIn || 7;
+        
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
     }
-    
-    // Update user stats
-    updateUserStats();
 }
 
-// Update User Stats
-function updateUserStats() {
-    document.getElementById('dailyProfit') && (document.getElementById('dailyProfit').textContent = `₹ ${currentUser.dailyProfit.toLocaleString()}`);
-    document.getElementById('totalIncome') && (document.getElementById('totalIncome').textContent = `₹ ${currentUser.totalEarnings.toLocaleString()}`);
-    document.getElementById('investmentDays') && (document.getElementById('investmentDays').textContent = currentUser.investmentDays);
-    document.getElementById('quickInvestAmount') && (document.getElementById('quickInvestAmount').textContent = `₹800`);
+// Update UI
+function updateUI() {
+    if (!currentUser) return;
     
-    // Profile page stats
-    document.getElementById('totalInvested') && (document.getElementById('totalInvested').textContent = `₹${currentUser.totalInvested.toLocaleString()}`);
-    document.getElementById('totalEarnings') && (document.getElementById('totalEarnings').textContent = `₹${currentUser.totalEarnings.toLocaleString()}`);
-    document.getElementById('availableBalance') && (document.getElementById('availableBalance').textContent = `₹${currentUser.balance.toLocaleString()}`);
+    // Update stats
+    document.getElementById('dailyProfit').textContent = currentUser.checkIn || 7;
+    document.getElementById('referral').textContent = currentUser.referral || 0;
+    document.getElementById('recharge').textContent = currentUser.recharge || 0;
+    document.getElementById('withdraw').textContent = currentUser.withdraw || 0;
+    
+    // Update user display
+    const userIdDisplay = userId ? userId.slice(-4) : '5541';
+    document.getElementById('userDisplay').textContent = `User ${userIdDisplay} ******`;
+    
+    // Update date
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('currentDate').textContent = `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
-// Load Dashboard Data
-function loadDashboardData() {
-    // Load products for slider
-    loadProductsForSlider();
-    
-    // Load user investments
-    loadUserInvestments();
-}
-
-// Load Products
-function loadProducts() {
-    database.ref('products').once('value', (snapshot) => {
-        const products = snapshot.val() || {};
-        displayProducts(products);
-    });
-}
-
-// Load Products for Slider
-function loadProductsForSlider() {
-    database.ref('products').limitToFirst(5).once('value', (snapshot) => {
-        const products = snapshot.val() || {};
-        displayProductsSlider(products);
-    });
-}
-
-// Display Products Slider
-function displayProductsSlider(products) {
-    const slider = document.getElementById('newProductsSlider');
-    if (!slider) return;
-    
-    slider.innerHTML = '';
-    
-    Object.values(products).forEach(product => {
-        if (product.status !== 'active') return;
+// Check-in Function
+async function handleCheckIn() {
+    try {
+        const today = new Date().toDateString();
         
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.innerHTML = `
-            <h3>${product.name}</h3>
-            <div class="product-price">₹${product.price.toLocaleString()}</div>
-            <div class="product-roi">${product.roi}% ROI</div>
-            <button class="product-btn" onclick="quickInvest('${product.id}')">Invest</button>
-        `;
-        slider.appendChild(card);
-    });
-}
-
-// Display Products Grid
-function displayProducts(products) {
-    const grid = document.getElementById('productsGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    
-    Object.entries(products).forEach(([id, product]) => {
-        if (product.status !== 'active') return;
+        // Update check-in count in Firebase
+        const updates = {
+            checkIn: (currentUser.checkIn || 7) + 1
+        };
         
-        const riskClass = `risk-${product.risk || 'medium'}`;
-        const card = document.createElement('div');
-        card.className = 'product-card-large';
-        card.innerHTML = `
-            <span class="product-badge">${product.category || 'Investment'}</span>
-            <h3>${product.name}</h3>
-            <div class="product-category">Min: ₹${product.price.toLocaleString()}</div>
-            <div class="product-price-large">₹${product.price.toLocaleString()}</div>
-            <div class="product-meta">
-                <span class="product-roi-large">${product.roi}% ROI</span>
-                <span class="product-risk ${riskClass}">${(product.risk || 'Medium').toUpperCase()}</span>
-            </div>
-            <div class="product-meta">
-                <span>${product.duration || 365} days</span>
-            </div>
-            <button class="product-btn" onclick="investNow('${id}')">Invest Now</button>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-// Load Activities
-function loadActivities() {
-    database.ref('activity').orderByChild('timestamp').limitToLast(5).once('value', (snapshot) => {
-        const activities = snapshot.val() || {};
-        displayActivities(activities);
-    });
-}
-
-// Display Activities
-function displayActivities(activities) {
-    const list = document.getElementById('recentActivities');
-    if (!list) return;
-    
-    list.innerHTML = '';
-    
-    if (Object.keys(activities).length === 0) {
-        // Mock activities
-        const mockActivities = [
-            { title: 'Investment credited', time: '2 min ago', amount: '+₹500', type: 'profit' },
-            { title: 'Withdrawal processed', time: '1 hour ago', amount: '-₹2,000', type: 'withdrawal' },
-            { title: 'Daily profit credited', time: '5 hours ago', amount: '+₹325', type: 'profit' },
-            { title: 'Investment made', time: '1 day ago', amount: '-₹10,000', type: 'investment' }
-        ];
+        await database.ref(`users/${userId}`).update(updates);
+        currentUser.checkIn = updates.checkIn;
         
-        mockActivities.forEach(activity => {
-            const item = createActivityItem(activity);
-            list.appendChild(item);
+        document.getElementById('dailyProfit').textContent = updates.checkIn;
+        showToast('Check-in successful!');
+        
+        // Add to activity
+        await database.ref('activity').push({
+            user: currentUser.name || 'User',
+            action: 'Checked in',
+            time: 'Just now',
+            timestamp: Date.now()
         });
-    } else {
-        Object.values(activities).reverse().forEach(activity => {
-            const item = createActivityItem({
-                title: activity.action,
-                time: activity.time,
-                amount: activity.amount,
-                type: activity.type || 'profit'
-            });
-            list.appendChild(item);
+        
+    } catch (error) {
+        console.error('Error during check-in:', error);
+        showToast('Error during check-in');
+    }
+}
+
+// Investment Form
+document.getElementById('investForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const product = document.getElementById('investProduct').value;
+    const amount = parseFloat(document.getElementById('investAmount').value);
+    
+    try {
+        // Create investment in Firebase
+        await database.ref('investments').push({
+            userId: userId,
+            userName: currentUser.name || 'User',
+            productName: product,
+            amount: amount,
+            status: 'active',
+            date: new Date().toISOString(),
+            timestamp: Date.now()
         });
+        
+        // Update user stats
+        const updates = {
+            totalInvested: (currentUser.totalInvested || 0) + amount
+        };
+        await database.ref(`users/${userId}`).update(updates);
+        
+        showToast('Investment successful!');
+        closeModal('investModal');
+        
+        // Add to activity
+        await database.ref('activity').push({
+            user: currentUser.name || 'User',
+            action: `Invested ₹${amount} in ${product}`,
+            time: 'Just now',
+            timestamp: Date.now()
+        });
+        
+    } catch (error) {
+        console.error('Error making investment:', error);
+        showToast('Error making investment');
     }
-}
-
-function createActivityItem(activity) {
-    const div = document.createElement('div');
-    div.className = 'activity-item';
-    
-    let iconClass = 'fa-chart-line';
-    let iconBg = 'profit';
-    
-    if (activity.type === 'withdrawal') {
-        iconClass = 'fa-money-bill-wave';
-        iconBg = 'withdrawal';
-    } else if (activity.type === 'investment') {
-        iconClass = 'fa-coins';
-        iconBg = 'investment';
-    }
-    
-    div.innerHTML = `
-        <div class="activity-icon ${iconBg}">
-            <i class="fas ${iconClass}"></i>
-        </div>
-        <div class="activity-details">
-            <div class="activity-title">${activity.title}</div>
-            <div class="activity-time">${activity.time}</div>
-        </div>
-        <div class="activity-amount ${activity.amount.startsWith('+') ? 'positive' : 'negative'}">${activity.amount}</div>
-    `;
-    
-    return div;
-}
-
-// Load Payment Settings
-function loadPaymentSettings() {
-    database.ref('settings/payment').once('value', (snapshot) => {
-        const settings = snapshot.val() || {};
-        
-        // Update UPI details
-        const upiIdElement = document.getElementById('upiId');
-        if (upiIdElement) {
-            upiIdElement.textContent = settings.upiId || 'admin@okhdfcbank';
-        }
-        
-        const qrElement = document.getElementById('upiQR');
-        if (qrElement) {
-            qrElement.src = settings.qrCode || 'https://via.placeholder.com/200';
-        }
-    });
-}
-
-// Load User Investments
-function loadUserInvestments() {
-    // This would filter by current user ID in production
-    database.ref('investments').orderByChild('userId').equalTo(currentUser.id).once('value', (snapshot) => {
-        const investments = snapshot.val() || {};
-        displayUserInvestments(investments);
-    });
-}
-
-// Display User Investments
-function displayUserInvestments(investments) {
-    const list = document.getElementById('investmentsList');
-    if (!list) return;
-    
-    list.innerHTML = '';
-    
-    if (Object.keys(investments).length === 0) {
-        list.innerHTML = '<div class="text-center" style="padding: 2rem;">No investments found</div>';
-        return;
-    }
-    
-    Object.entries(investments).forEach(([id, investment]) => {
-        const progress = (investment.daysCompleted / investment.duration) * 100;
-        const card = document.createElement('div');
-        card.className = 'investment-card';
-        card.innerHTML = `
-            <div class="investment-header">
-                <div>
-                    <div class="investment-product">${investment.productName}</div>
-                    <div class="investment-date">Started: ${formatDate(new Date(investment.startDate))}</div>
-                </div>
-                <div class="investment-amount">₹${investment.amount.toLocaleString()}</div>
-            </div>
-            <div class="investment-details">
-                <div class="investment-detail">
-                    <span class="label">Current Value</span>
-                    <span class="value">₹${(investment.currentValue || investment.amount).toLocaleString()}</span>
-                </div>
-                <div class="investment-detail">
-                    <span class="label">Profit</span>
-                    <span class="value ${(investment.profitLoss || 0) >= 0 ? 'profit-positive' : 'profit-negative'}">
-                        ${(investment.profitLoss || 0) >= 0 ? '+' : '-'}₹${Math.abs(investment.profitLoss || 0).toLocaleString()}
-                    </span>
-                </div>
-                <div class="investment-detail">
-                    <span class="label">Returns</span>
-                    <span class="value">${investment.profitLossPercent || 0}%</span>
-                </div>
-            </div>
-            <div class="investment-progress">
-                <div class="progress-fill" style="width: ${progress}%"></div>
-            </div>
-            <div class="investment-footer">
-                <span class="investment-status status-${investment.status}">${investment.status}</span>
-                <span>${investment.daysCompleted || 0}/${investment.duration} days</span>
-            </div>
-        `;
-        list.appendChild(card);
-    });
-}
-
-// Load Transactions
-function loadTransactions() {
-    database.ref('transactions').orderByChild('userId').equalTo(currentUser.id).limitToLast(20).once('value', (snapshot) => {
-        const transactions = snapshot.val() || {};
-        displayTransactions(transactions);
-    });
-}
-
-// Display Transactions
-function displayTransactions(transactions) {
-    const list = document.getElementById('transactionsList');
-    if (!list) return;
-    
-    list.innerHTML = '';
-    
-    if (Object.keys(transactions).length === 0) {
-        list.innerHTML = '<div class="text-center" style="padding: 2rem;">No transactions found</div>';
-        return;
-    }
-    
-    Object.values(transactions).reverse().forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'transaction-item';
-        
-        let icon = 'fa-arrow-down';
-        let iconClass = 'deposit';
-        let amountClass = 'positive';
-        let amountPrefix = '+';
-        
-        if (t.type === 'withdrawal') {
-            icon = 'fa-arrow-up';
-            iconClass = 'withdrawal';
-            amountClass = 'negative';
-            amountPrefix = '-';
-        } else if (t.type === 'profit') {
-            icon = 'fa-chart-line';
-            iconClass = 'profit';
-        } else if (t.type === 'investment') {
-            icon = 'fa-coins';
-            iconClass = 'investment';
-            amountClass = 'negative';
-            amountPrefix = '-';
-        }
-        
-        item.innerHTML = `
-            <div class="transaction-icon ${iconClass}">
-                <i class="fas ${icon}"></i>
-            </div>
-            <div class="transaction-details">
-                <div class="transaction-title">${t.description || t.type}</div>
-                <div class="transaction-meta">${formatDate(new Date(t.date))}</div>
-            </div>
-            <div class="transaction-amount ${amountClass}">${amountPrefix}₹${t.amount.toLocaleString()}</div>
-        `;
-        
-        list.appendChild(item);
-    });
-}
-
-// Menu Toggle
-document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
-
-function toggleMenu() {
-    document.getElementById('sideMenu').classList.toggle('active');
-    document.getElementById('overlay').classList.toggle('active');
-}
-
-function closeAllModals() {
-    document.getElementById('sideMenu')?.classList.remove('active');
-    document.getElementById('overlay').classList.remove('active');
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.classList.remove('active');
-    });
-}
+});
 
 // Modal Functions
 function showInvestModal() {
-    // Load products for select
-    database.ref('products').once('value', (snapshot) => {
-        const products = snapshot.val() || {};
-        const select = document.getElementById('investProduct');
-        select.innerHTML = '<option value="">Choose product...</option>';
-        
-        Object.entries(products).forEach(([id, product]) => {
-            if (product.status === 'active') {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = `${product.name} - ₹${product.price} (${product.roi}% ROI)`;
-                select.appendChild(option);
-            }
-        });
-    });
-    
-    openModal('investModal');
-}
-
-function showRecharge() {
-    openModal('rechargeModal');
-}
-
-function showWithdraw() {
-    document.getElementById('availableBalance').textContent = `₹${currentUser.balance.toLocaleString()}`;
-    openModal('withdrawModal');
-}
-
-function openModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
-    document.getElementById('overlay').classList.add('active');
+    document.getElementById('investModal').classList.add('active');
 }
 
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
-    document.getElementById('overlay').classList.remove('active');
 }
 
-// Investment Form
-document.getElementById('investForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
+// Toast Notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
     
-    const productId = document.getElementById('investProduct').value;
-    const amount = parseFloat(document.getElementById('investAmount').value);
-    const method = document.getElementById('paymentMethod').value;
-    
-    if (!productId) {
-        showToast('Please select a product');
-        return;
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
     }
-    
-    // Get product details
-    database.ref(`products/${productId}`).once('value', (snapshot) => {
-        const product = snapshot.val();
+};
+
+// Add click handlers for stat boxes
+document.querySelectorAll('.stat-box').forEach((box, index) => {
+    box.addEventListener('click', () => {
+        const actions = ['checkin', 'referral', 'recharge', 'withdraw'];
+        const action = actions[index];
         
-        if (amount < product.price) {
-            showToast(`Minimum investment is ₹${product.price}`);
-            return;
+        switch(action) {
+            case 'checkin':
+                handleCheckIn();
+                break;
+            case 'referral':
+                window.location.href = 'referral.html';
+                break;
+            case 'recharge':
+                window.location.href = 'recharge.html';
+                break;
+            case 'withdraw':
+                window.location.href = 'withdraw.html';
+                break;
         }
-        
-        // Create investment
-        const investment = {
-            userId: currentUser.id,
-            userName: currentUser.name,
-            productId: productId,
-            productName: product.name,
-            amount: amount,
-            currentValue: amount,
-            profitLoss: 0,
-            profitLossPercent: 0,
-            startDate: new Date().toISOString(),
-            endDate: new Date(Date.now() + (product.duration * 24 * 60 * 60 * 1000)).toISOString(),
-            duration: product.duration,
-            daysCompleted: 0,
-            status: 'pending',
-            roi: product.roi
-        };
-        
-        database.ref('investments').push(investment)
-            .then(() => {
-                // Create transaction
-                const transaction = {
-                    userId: currentUser.id,
-                    type: 'investment',
-                    amount: amount,
-                    description: `Invested in ${product.name}`,
-                    status: 'pending',
-                    date: new Date().toISOString()
-                };
-                
-                database.ref('transactions').push(transaction);
-                
-                showToast('Investment successful!');
-                closeModal('investModal');
-                
-                // Add to activity
-                database.ref('activity').push({
-                    user: currentUser.name,
-                    action: `Invested ₹${amount} in ${product.name}`,
-                    time: 'Just now',
-                    timestamp: Date.now()
-                });
-            })
-            .catch(error => {
-                console.error('Error making investment:', error);
-                showToast('Error making investment');
-            });
     });
 });
-
-// Recharge Form
-document.getElementById('rechargeForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const amount = parseFloat(document.getElementById('rechargeAmount').value);
-    const method = document.getElementById('rechargeMethod').value;
-    
-    if (amount < 100) {
-        showToast('Minimum recharge amount is ₹100');
-        return;
-    }
-    
-    // Create transaction
-    const transaction = {
-        userId: currentUser.id,
-        type: 'deposit',
-        amount: amount,
-        method: method,
-        description: `Added money via ${method.toUpperCase()}`,
-        status: 'pending',
-        date: new Date().toISOString()
-    };
-    
-    database.ref('transactions').push(transaction)
-        .then(() => {
-            showToast('Recharge request submitted! Please complete payment.');
-            closeModal('rechargeModal');
-            
-            // Add to activity
-            database.ref('activity').push({
-                user: currentUser.name,
-                action: `Recharged ₹${amount} via ${method}`,
-                time: 'Just now',
-                timestamp: Date.now()
-            });
-        })
-        .catch(error => {
-            console.error('Error creating recharge:', error);
-            showToast('Error creating recharge');
-        });
-});
-
-// Withdraw Form
-document.getElementById('withdrawForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const amount = parseFloat(document.getElementById('withdrawAmount').value);
-    const method = document.getElementById('withdrawMethod').value;
-    
-    if (amount < 100) {
-        showToast('Minimum withdrawal amount is ₹100');
-        return;
-    }
-    
-    if (amount > currentUser.balance) {
-        showToast('Insufficient balance');
-        return;
-    }
-    
-    // Validate details based on method
-    if (method === 'bank') {
-        const accountName = document.getElementById('accountName').value;
-        const accountNumber = document.getElementById('accountNumber').value;
-        const ifscCode = document.getElementById('ifscCode').value;
-        
-        if (!accountName || !accountNumber || !ifscCode) {
-            showToast('Please fill all bank details');
-            return;
-        }
-    } else if (method === 'upi') {
-        const upiId = document.getElementById('upiIdWithdraw').value;
-        if (!upiId) {
-            showToast('Please enter UPI ID');
-            return;
-        }
-    }
-    
-    // Create withdrawal re

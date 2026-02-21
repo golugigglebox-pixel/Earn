@@ -7,150 +7,100 @@
     <link rel="stylesheet" href="user-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .products-page {
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
             padding-bottom: 80px;
         }
         
-        .products-header {
+        .product-item {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .product-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .product-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .product-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+        
+        .back-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
+            gap: 16px;
+            margin-bottom: 20px;
         }
         
         .back-btn {
             background: var(--card-bg);
             border: none;
-            color: var(--text-primary);
-            font-size: 1.2rem;
+            color: white;
+            font-size: 20px;
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: pointer;
-        }
-        
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .product-card-large {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 1.2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        .product-badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            background: rgba(142, 45, 226, 0.2);
-            color: #8e2de2;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-        }
-        
-        .product-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .product-price-large {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #8e2de2;
-            margin-bottom: 0.5rem;
-        }
-        
-        .product-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
-        
-        .product-roi-large {
-            color: #4cc9f0;
-            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="products-page">
-            <div class="products-header">
-                <button class="back-btn" onclick="window.location.href='dashboard.html'">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h2>All Products</h2>
-                <div></div>
-            </div>
-            
-            <div class="products-grid" id="productsGrid">
-                <!-- Products will be loaded here -->
-            </div>
+        <div class="back-header">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>All Products</h2>
         </div>
         
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="products.html" class="nav-item active">
-                <i class="fas fa-cube"></i>
-                <span>Products</span>
-            </a>
-            <a href="promotion.html" class="nav-item">
-                <i class="fas fa-gift"></i>
-                <span>Promotion</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
+        <div class="products-grid" id="productsGrid">
+            <!-- Products will be loaded here -->
+            <div class="loading-spinner">Loading...</div>
+        </div>
     </div>
-    
-    <script src="user-script.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const products = [
-                { name: 'Dairymilk 1', price: 1000, roi: 12, category: 'Basic' },
-                { name: 'Dairymilk 2', price: 2000, roi: 15, category: 'Silver' },
-                { name: 'Dairymilk 3', price: 5000, roi: 18, category: 'Gold' },
-                { name: 'Dairymilk 4', price: 10000, roi: 20, category: 'Platinum' },
-                { name: 'Dairymilk 5', price: 25000, roi: 22, category: 'Diamond' },
-                { name: 'Dairymilk 6', price: 50000, roi: 25, category: 'VIP' }
-            ];
-            
-            const grid = document.getElementById('productsGrid');
-            grid.innerHTML = '';
-            
-            products.forEach(product => {
-                const card = document.createElement('div');
-                card.className = 'product-card-large';
-                card.innerHTML = `
-                    <span class="product-badge">${product.category}</span>
-                    <h3 class="product-title">${product.name}</h3>
-                    <div class="product-price-large">₹${product.price}</div>
-                    <div class="product-meta">
-                        <span class="product-roi-large">${product.roi}% ROI</span>
-                        <span>365 days</span>
-                    </div>
-                    <button class="product-btn" onclick="investInProduct('${product.name}', ${product.price})">
-                        Invest Now
-                    </button>
-                `;
-                grid.appendChild(card);
-            });
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const snapshot = await database.ref('products').once('value');
+                const products = snapshot.val() || {};
+                
+                const grid = document.getElementById('productsGrid');
+                grid.innerHTML = '';
+                
+                Object.values(products).forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'product-item';
+                    div.innerHTML = `
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <p>${product.roi}% ROI • ${product.duration || 365} days</p>
+                        </div>
+                        <div class="product-price">₹${product.price}</div>
+                    `;
+                    grid.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
         });
     </script>
 </body>
